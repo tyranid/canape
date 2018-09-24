@@ -32,7 +32,7 @@ namespace CANAPE.Forms
 
         public CreateCertForm() 
             : this(false)
-        {                        
+        {
         }
 
         public CreateCertForm(bool makeCA)
@@ -119,6 +119,14 @@ namespace CANAPE.Forms
                         if (checkBoxCA.Checked)
                         {
                             exts.Add(new X509BasicConstraintsExtension(true, false, 0, true));
+                        }
+                        else
+                        {
+                            OidCollection enhanced_usage_oids = new OidCollection();
+                            enhanced_usage_oids.Add(new Oid("1.3.6.1.5.5.7.3.1"));
+                            exts.Add(new X509EnhancedKeyUsageExtension(enhanced_usage_oids, false));
+                            exts.Add(new X509BasicConstraintsExtension(false, false, 0, true));
+                            exts.Add(new X509KeyUsageExtension(X509KeyUsageFlags.KeyEncipherment | X509KeyUsageFlags.DigitalSignature, true));
                         }
 
                         DateTime notBefore = DateTime.Now.Subtract(TimeSpan.FromDays(1));
