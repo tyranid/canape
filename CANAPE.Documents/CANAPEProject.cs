@@ -14,14 +14,6 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.IO.Compression;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
 using CANAPE.DataFrames;
 using CANAPE.Documents.Data;
 using CANAPE.Documents.Net;
@@ -29,10 +21,18 @@ using CANAPE.Documents.Net.Factories;
 using CANAPE.Net.Layers;
 using CANAPE.Nodes;
 using CANAPE.Utils;
-using System.Text;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Security;
 using System.Security.Permissions;
-using System.Runtime.Serialization.Formatters;
+using System.Text;
 
 namespace CANAPE.Documents
 {
@@ -63,17 +63,17 @@ namespace CANAPE.Documents
         [NonSerialized]
         private bool _isNew;
 
-        private IProxyClientFactory _defaultClient;        
+        private IProxyClientFactory _defaultClient;
 
         /// <summary>
         /// Name of loaded project
         /// </summary>
-        public string FileName 
+        public string FileName
         {
             get
             {
                 return _fileName;
-            }            
+            }
         }
 
         /// <summary>
@@ -101,11 +101,11 @@ namespace CANAPE.Documents
         /// <summary>
         /// Default client factory
         /// </summary>
-        public IProxyClientFactory DefaultProxyClient 
+        public IProxyClientFactory DefaultProxyClient
         {
             get
             {
-                return _defaultClient;                    
+                return _defaultClient;
             }
 
             set
@@ -124,7 +124,7 @@ namespace CANAPE.Documents
                 }
             }
         }
-        
+
         private Dictionary<string, IDocumentObject> _documents;
         private Dictionary<string, string> _properties;
 
@@ -135,13 +135,13 @@ namespace CANAPE.Documents
         private MetaDictionary _globalMeta;
 
         private CANAPEProject()
-        {            
+        {
             _documents = new Dictionary<string, IDocumentObject>();
             _properties = new Dictionary<string, string>();
             _defaultClient = new IpProxyClientFactory();
             _globalMeta = new MetaDictionary();
         }
-        
+
         // Resolve an assembly from the project if available
         static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
         {
@@ -151,7 +151,7 @@ namespace CANAPE.Documents
                 {
                     AssemblyName name = doc.GetName();
 
-                    if((name != null) && (name.FullName == args.Name))
+                    if ((name != null) && (name.FullName == args.Name))
                     {
                         return doc.GetAssembly();
                     }
@@ -184,7 +184,7 @@ namespace CANAPE.Documents
             string ret = null;
             int count = 1;
 
-            if(!_documents.ContainsKey(defaultName.ToLower()))
+            if (!_documents.ContainsKey(defaultName.ToLower()))
             {
                 return defaultName;
             }
@@ -208,7 +208,7 @@ namespace CANAPE.Documents
         }
 
         private void GenerateName(IDocumentObject document)
-        {            
+        {
             document.Name = GenerateName(document.DefaultName);
         }
 
@@ -231,10 +231,10 @@ namespace CANAPE.Documents
         private void SetCopyName(IDocumentObject document)
         {
             int count = 0;
-            while(count < int.MaxValue)
+            while (count < int.MaxValue)
             {
                 string temp = String.Format("{0} - Copy {1}", document.Name, count);
-                if(!_documents.ContainsKey(temp.ToLower()))
+                if (!_documents.ContainsKey(temp.ToLower()))
                 {
                     document.Name = temp;
                     break;
@@ -242,7 +242,7 @@ namespace CANAPE.Documents
                 count++;
             }
 
-            if(count == int.MaxValue)
+            if (count == int.MaxValue)
             {
                 throw new InvalidOperationException();
             }
@@ -254,7 +254,7 @@ namespace CANAPE.Documents
             {
                 DocumentAdded.Invoke(this, new DocumentEventArgs(document));
             }
-        }        
+        }
 
         /// <summary>
         /// Create a document from a type parameter
@@ -349,7 +349,7 @@ namespace CANAPE.Documents
 
             _documents.Add(document.Name.ToLower(), document);
             _documentsModified = true;
-            
+
             OnDocumentAdded(document);
         }
 
@@ -414,7 +414,7 @@ namespace CANAPE.Documents
                 {
                     DocumentRenamed.Invoke(this, new DocumentEventArgs(document));
                 }
-                
+
                 return true;
             }
         }
@@ -449,14 +449,14 @@ namespace CANAPE.Documents
             currentProject = new CANAPEProject();
             currentProject._isNew = true;
         }
-        
+
         /// <summary>
         /// Indicate if the current document is dirty
         /// </summary>
         public bool IsDirty
         {
             get
-            {                
+            {
                 foreach (var pair in _documents)
                 {
                     if (pair.Value.Dirty)
@@ -466,7 +466,7 @@ namespace CANAPE.Documents
                 }
 
                 return _documentsModified;
-            }            
+            }
         }
 
         /// <summary>
@@ -567,7 +567,7 @@ namespace CANAPE.Documents
                 stm.Position = streamStart;
                 ret = new Version(0, 0);
             }
-            
+
             return ret;
         }
 
@@ -631,10 +631,10 @@ namespace CANAPE.Documents
                 string tempName = Path.GetTempFileName();
 
                 using (Stream stm = File.Open(tempName, FileMode.Create, FileAccess.ReadWrite))
-                {                    
+                {
                     WriteFileVersion(GeneralUtils.GetCanapeVersion(), stm);
-                    
-                    using(Stream outStream = compressed ? new GZipStream(stm, CompressionMode.Compress, false) : stm)
+
+                    using (Stream outStream = compressed ? new GZipStream(stm, CompressionMode.Compress, false) : stm)
                     {
                         BinaryFormatter formatter = new BinaryFormatter(null, new StreamingContext(StreamingContextStates.File));
 
@@ -680,7 +680,7 @@ namespace CANAPE.Documents
                 // Fix some types in Documents assembly
                 if (assemblyName == "CANAPE.Documents, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0d5b25a3516745f0")
                 {
-                    switch(typeName)
+                    switch (typeName)
                     {
                         case "CANAPE.Documents.Net.Factories.INetworkLayerFactory":
                             return typeof(INetworkLayerFactory);
@@ -706,7 +706,7 @@ namespace CANAPE.Documents
         sealed class FixSerializationFrom13 : SerializationBinder
         {
             const string _oldToken = "PublicKeyToken=0d5b25a3516745f0";
-            private string _pubkeyToken;
+            private readonly string _pubkeyToken;
 
             internal FixSerializationFrom13()
             {
@@ -752,27 +752,29 @@ namespace CANAPE.Documents
             private bool AllowedTypeOrAssembly(Type type)
             {
                 // "Safe" types I guess, just let them through
-                if(type.IsEnum || type.IsPrimitive || type == typeof(String))
+                if (type.IsEnum || type.IsPrimitive || type == typeof(string))
                 {
                     return true;
                 }
-                                
-                string typeNamespace = type.Namespace.ToLower();           
+
+                string typeNamespace = type.Namespace.ToLower();
 
                 if (typeNamespace.StartsWith("canape"))
                 {
                     return true;
                 }
 
-                switch(typeNamespace.ToLower())
+                switch (typeNamespace.ToLower())
                 {
                     case "system":
                     case "system.collections":
                     case "system.collections.generic":
                     case "system.text":
-                    case "system.security.authentication":  
+                    case "system.security.authentication":
                     case "system.collections.objectmodel":
                     case "system.reflection":
+                    case "system.net":
+                    case "system.security.cryptography.x509certificates":
                         return true;
                 }
 
@@ -781,9 +783,9 @@ namespace CANAPE.Documents
 
             public override Type BindToType(string assemblyName, string typeName)
             {
-                System.Diagnostics.Trace.WriteLine(String.Format("{0} {1}", assemblyName, typeName));
+                System.Diagnostics.Debug.WriteLine(String.Format("{0} {1}", assemblyName, typeName));
                 Type type = null;
-               
+
                 if (_delegateBinder != null)
                 {
                     type = _delegateBinder.BindToType(assemblyName, typeName);
@@ -823,7 +825,7 @@ namespace CANAPE.Documents
                 {
                     binder = new FixSerializationFrom12();
                 }
-                else if(ver.Minor == 3)
+                else if (ver.Minor == 3)
                 {
                     binder = new FixSerializationFrom13();
                 }
@@ -836,7 +838,7 @@ namespace CANAPE.Documents
             }
 
             ret.Binder = binder;
-            
+
             return ret;
         }
 
@@ -846,7 +848,7 @@ namespace CANAPE.Documents
         /// <param name="stm">The stream</param>
         /// <param name="fileName">The filename to use (can be null)</param>
         /// <param name="verifyVersion">Set true to verify the version being opened match this canape</param>
-        /// <param name="secure">Attemps to make the load secure, not likely to succeed</param>        
+        /// <param name="secure">Attemps to make the load secure, not likely to succeed</param>
         public static void Load(Stream stm, string fileName, bool verifyVersion, bool secure)
         {
             // If an empty stream
@@ -879,7 +881,7 @@ namespace CANAPE.Documents
                 stm.Position = stm.Position - 1;
 
                 using (Stream inStream = compressed ? new GZipStream(stm, CompressionMode.Decompress, false) : stm)
-                {                    
+                {
                     BinaryFormatter formatter = CreateFormatter(ver, secure);
                     CANAPEProject newProject = null;
 
@@ -921,9 +923,9 @@ namespace CANAPE.Documents
         /// </summary>
         /// <param name="fileName">The filename to use</param>
         /// <param name="verifyVersion">Set true to verify the version being opened match this canape</param>
-        /// <param name="secure">Attempts to open the file securely</param>        
+        /// <param name="secure">Attempts to open the file securely</param>
         public static void Load(string fileName, bool verifyVersion, bool secure)
-        {             
+        {
             using (Stream stm = File.Open(fileName, FileMode.Open, FileAccess.Read))
             {
                 Load(stm, fileName, verifyVersion, secure);
